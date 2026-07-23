@@ -1,0 +1,31 @@
+package ru.teamworld.reports;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+
+import java.util.HashMap;
+import java.util.Map;
+
+final class ReloadCommand implements CommandExecutor {
+    private final ReportDGPlugin plugin;
+    ReloadCommand(ReportDGPlugin plugin) { this.plugin = plugin; }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        PluginConfig config = plugin.config();
+        if (!sender.hasPermission("reportdg.reload")) {
+            Map<String, String> placeholders = ReportService.basePlaceholders(config);
+            sender.sendMessage(Text.format(config.messageNoPermission, placeholders));
+            return true;
+        }
+        if (!plugin.reloadPlugin()) {
+            sender.sendMessage(Text.color(config.messagePrefix + "&#FF5555Ошибка перезагрузки. Подробности в консоли."));
+            return true;
+        }
+        PluginConfig updated = plugin.config();
+        Map<String, String> placeholders = ReportService.basePlaceholders(updated);
+        sender.sendMessage(Text.format(updated.messageReloaded, placeholders));
+        return true;
+    }
+}
